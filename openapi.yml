@@ -1,0 +1,654 @@
+openapi: 3.1.0
+info:
+  title: Real-Time Chat API
+  description: |
+    OpenAPI 3.1 specification for a Real-Time Chat API that manages users, conversations and messages.  
+    The API supports REST endpoints for creating and managing resources, and includes a WebSocket upgrade endpoint for real-time events.  
+  version: 0.0.1
+  contact:
+    name: GitHub Repository
+    url: https://github.com/maki-keep/real-time_chat_api
+  license:
+    name: GPLv3
+servers:
+  - url: https://api.example.com/v0
+    description: Production server
+  - url: https://staging.api.example.com/v0
+    description: Staging server
+tags:
+  - name: users
+    description: Operations around user accounts and profiles.
+  - name: conversations
+    description: Conversation lifecycle and membership.
+  - name: messages
+    description: Sending, editing and retrieving messages.
+  - name: realtime
+    description: WebSocket upgrade for real-time events.
+paths:
+  /users:
+    get:
+      tags:
+        - users
+      summary: List users.
+      description: Retrieve a paginated list of users. Supports filtering and search.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - name: q
+          in: query
+          description: Free-text search against username and display name.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated list of users.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUsers'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - users
+      summary: Create a user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '201':
+          description: Created user object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /users/{userId}:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Unique ID of the user.
+    get:
+      tags:
+        - users
+      summary: Get user by ID.
+      responses:
+        '200':
+          description: User object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+        - users
+      summary: Update a user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: Updated user object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - users
+      summary: Delete a user.
+      responses:
+        '204':
+          description: User deleted successfully.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /conversations:
+    get:
+      tags:
+        - conversations
+      summary: List conversations.
+      description: Returns conversations visible to the authenticated user.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        '200':
+          description: Paginated list of conversations.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedConversations'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - conversations
+      summary: Create a conversation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversationCreate'
+      responses:
+        '201':
+          description: Created conversation object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /conversations/{conversationId}:
+    parameters:
+      - name: conversationId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Unique conversation identifier.
+    get:
+      tags:
+        - conversations
+      summary: Get conversation.
+      responses:
+        '200':
+          description: Conversation object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+        - conversations
+      summary: Update conversation metadata.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversationUpdate'
+      responses:
+        '200':
+          description: Updated conversation object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - conversations
+      summary: Delete conversation.
+      responses:
+        '204':
+          description: Conversation deleted successfully.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /conversations/{conversationId}/members:
+    parameters:
+      - name: conversationId
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+        - conversations
+      summary: Add a member to a conversation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemberAdd'
+      responses:
+        '200':
+          description: Conversation with updated list of members.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /conversations/{conversationId}/members/{memberId}:
+    parameters:
+      - name: conversationId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+    delete:
+      tags:
+        - conversations
+      summary: Remove a member by ID from a conversation.
+      responses:
+        '204':
+          description: Member removed successfully.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /conversations/{conversationId}/messages:
+    parameters:
+      - name: conversationId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - messages
+      summary: List messages in a conversation.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - name: since
+          in: query
+          description: Return messages created after this ISO 8601 timestamp.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Paginated list of messages.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMessages'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - messages
+      summary: Send a message to a conversation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageCreate'
+      responses:
+        '201':
+          description: Created message object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /messages/{messageId}:
+    parameters:
+      - name: messageId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - messages
+      summary: Get a message.
+      responses:
+        '200':
+          description: Message object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+        - messages
+      summary: Edit a message.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageUpdate'
+      responses:
+        '200':
+          description: Updated message object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - messages
+      summary: Delete a message.
+      responses:
+        '204':
+          description: Message deleted successfully.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /realtime/connect:
+    get:
+      tags:
+        - realtime
+      summary: Upgrade to a WebSocket for realtime events.
+      description: |
+        Clients should send a GET request with `Connection: Upgrade` and `Upgrade: WebSocket`.  
+        The endpoint performs an HTTP to WebSocket upgrade to stream realtime events such as new messages, typing indicators, and presence.  
+        Authentication is done via the `Authorization: Bearer <token>` header or via a short-lived query token.  
+      parameters:
+        - name: token
+          in: query
+          description: Optional short-lived token for initial authentication if Authorization header is unavailable.
+          schema:
+            type: string
+      responses:
+        '101':
+          description: Upgrading HTTP to WebSocket.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          description: Application-level error code.
+        message:
+          type: string
+          description: Human-readable error message.
+    Date:
+      type: object
+      properties:
+        created:
+          type: string
+          format: date-time
+        updated:
+          type: string
+          format: date-time
+    User:
+      type: object
+      required:
+        - id
+        - username
+      properties:
+        id:
+          type: string
+          description: Unique user ID.
+        username:
+          type: string
+        avatar:
+          type: object
+          properties:
+            url:
+              type: string
+              format: uri
+        bio:
+          type: string
+        date:
+          $ref: '#/components/schemas/Date'
+        displayName:
+          type: string
+    UserCreate:
+      type: object
+      required:
+        - password
+        - username
+      properties:
+        password:
+          type: string
+        username:
+          type: string
+    UserUpdate:
+      type: object
+      properties:
+        avatarUrl:
+          type: string
+          format: uri
+        bio:
+          type: string
+        displayName:
+          type: string
+        username:
+          type: string
+    Conversation:
+      type: object
+      required:
+        - id
+        - title
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        date:
+          $ref: '#/components/schemas/Date'
+        isPrivate:
+          type: boolean
+          description: Whether conversation is private.
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/Member'
+    ConversationCreate:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+        isPrivate:
+          type: boolean
+        memberIds:
+          type: array
+          items:
+            type: string
+    ConversationUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        isPrivate:
+          type: boolean
+    Role:
+      type: object
+      description: A user's role in a conversation.
+      required:
+        - id
+      properties:
+        id:
+          type: string
+        rolename:
+          type: string
+    Member:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        role:
+          $ref: '#/components/schemas/Role'
+    MemberAdd:
+      type: object
+      required:
+        - userId
+      properties:
+        userId:
+          type: string
+        roleId:
+          type: string
+    Message:
+      type: object
+      required:
+        - author
+        - content
+        - conversationId
+        - id
+      properties:
+        author:
+          $ref: '#/components/schemas/User'
+        content:
+          type: string
+          description: Message body, as plain text or Markdown.
+        conversationId:
+          type: string
+        id:
+          type: string
+        date:
+          $ref: '#/components/schemas/Date'
+        metadata:
+          type: object
+          description: Metadata such as attachments, reactions.
+    MessageCreate:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+        metadata:
+          type: object
+    MessageUpdate:
+      type: object
+      properties:
+        content:
+          type: string
+        metadata:
+          type: object
+    Pagination:
+      type: object
+      properties:
+        limit:
+          type: integer
+        offset:
+          type: integer
+        total:
+          type: integer
+    PaginatedUsers:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    PaginatedConversations:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Conversation'
+    PaginatedMessages:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+  parameters:
+    limit:
+      name: limit
+      in: query
+      description: Maximum number of items to return.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    offset:
+      name: offset
+      in: query
+      description: Pagination offset.
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+  responses:
+    BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Authentication required or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
