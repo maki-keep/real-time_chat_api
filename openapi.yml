@@ -76,7 +76,7 @@ paths:
         required: true
         schema:
           type: string
-        description: Unique ID of the user.
+        description: Unique user identifier.
     get:
       tags:
         - users
@@ -229,6 +229,7 @@ paths:
         required: true
         schema:
           type: string
+        description: Unique conversation identifier.
     post:
       tags:
         - conversations
@@ -257,11 +258,13 @@ paths:
         required: true
         schema:
           type: string
+        description: Unique conversation identifier.
       - name: memberId
         in: path
         required: true
         schema:
           type: string
+        description: Unique member identifier.
     delete:
       tags:
         - conversations
@@ -280,6 +283,7 @@ paths:
         required: true
         schema:
           type: string
+        description: Unique conversation identifier.
     get:
       tags:
         - messages
@@ -323,17 +327,24 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
-  /messages/{messageId}:
+  /conversations/{conversationId}/messages/{messageId}:
     parameters:
+      - name: conversationId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Unique conversation identifier.
       - name: messageId
         in: path
         required: true
         schema:
           type: string
+        description: Unique message identifier.
     get:
       tags:
         - messages
-      summary: Get a message.
+      summary: Get a message from a conversation.
       responses:
         '200':
           description: Message object.
@@ -348,7 +359,7 @@ paths:
     patch:
       tags:
         - messages
-      summary: Edit a message.
+      summary: Edit a message from a conversation.
       requestBody:
         required: true
         content:
@@ -371,7 +382,7 @@ paths:
     delete:
       tags:
         - messages
-      summary: Delete a message.
+      summary: Delete a message from a conversation.
       responses:
         '204':
           description: Message deleted successfully.
@@ -475,6 +486,7 @@ components:
       properties:
         id:
           type: string
+          description: Unique conversation ID.
         title:
           type: string
         date:
@@ -499,6 +511,7 @@ components:
           type: array
           items:
             type: string
+            description: References memberId.
     ConversationUpdate:
       type: object
       properties:
@@ -514,17 +527,24 @@ components:
       properties:
         id:
           type: string
+          description: Unique role ID.
         rolename:
           type: string
     Member:
       type: object
       required:
-        - user
+        - id
+        - userId
       properties:
-        user:
-          $ref: '#/components/schemas/User'
-        role:
-          $ref: '#/components/schemas/Role'
+        id:
+          type: string
+          description: Unique member ID.
+        userId:
+          type: string
+          description: References userId.
+        roleId:
+          type: string
+          description: References roleId.
     MemberAdd:
       type: object
       required:
@@ -532,8 +552,10 @@ components:
       properties:
         userId:
           type: string
+          description: References userId.
         roleId:
           type: string
+          description: References roleId.
     Message:
       type: object
       required:
@@ -543,14 +565,17 @@ components:
         - id
       properties:
         author:
-          $ref: '#/components/schemas/User'
+          type: string
+          description: References userId.
         content:
           type: string
           description: Message body, as plain text or Markdown.
         conversationId:
           type: string
+          description: References conversationId.
         id:
           type: string
+          description: Unique message ID.
         date:
           $ref: '#/components/schemas/Date'
         metadata:
