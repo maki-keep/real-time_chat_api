@@ -1,8 +1,8 @@
 import { JwtPayload } from 'jsonwebtoken';
-import 'express';
+import 'ws';
 
-declare module 'express' {
-  interface Request {
+declare module 'ws' {
+  interface WebSocket {
     /**
      * Authenticated user payload.
      */

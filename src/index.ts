@@ -1,15 +1,18 @@
-const http = require('http');
-const url = require('url');
+import http from 'http';
+import { IncomingMessage } from 'http';
+import url from 'url';
 
-const app = require('./app');
-const { BASE_URL, PORT } = require('./config');
-const { verifyToken } = require('./middleware/auth');
-const webSocketServer = require('./wss');
+import app from './app.ts';
+import config from './config.ts';
+import { verifyToken } from './middleware/auth.ts';
+import webSocketServer from './wss.ts';
+
+const { BASE_URL, PORT } = config;
 
 const server = http.createServer(app);
 
-server.on('upgrade', (request, socket, head) => {
-  const { pathname } = url.parse(request.url, true);
+server.on('upgrade', (request: IncomingMessage, socket, head) => {
+  const { pathname } = url.parse(request.url || '', true);
   if (pathname !== '/realtime/connect') {
     socket.destroy();
     return;
@@ -17,7 +20,7 @@ server.on('upgrade', (request, socket, head) => {
 
   try {
     // save the decoded JWT payload into the request object
-    const user = verifyToken(request);
+    const user = verifyToken(request as any);
 
     webSocketServer.handleUpgrade(request, socket, head, ws => {
       webSocketServer.emit('connection', ws, request, user);

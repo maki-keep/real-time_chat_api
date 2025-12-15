@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express';
 
-const { authenticate } = require('./middleware/auth');
+import { authenticate } from './middleware/auth.ts';
 
 const app = express();
 app.use(express.json());
@@ -10,4 +10,4 @@ app.use(authenticate);
 
 app.get('/', (req, res) => res.json({ status: 'ok' }));
 
-module.exports = app;
+export default app;
