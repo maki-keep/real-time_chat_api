@@ -507,11 +507,6 @@ components:
           type: string
         isPrivate:
           type: boolean
-        memberIds:
-          type: array
-          items:
-            type: string
-            description: References memberId.
     ConversationUpdate:
       type: object
       properties:
