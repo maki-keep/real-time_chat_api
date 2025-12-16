@@ -1,6 +1,7 @@
-import { WebSocket, WebSocketServer } from 'ws';
-import { IncomingMessage } from 'http';
-import { JwtPayload } from 'jsonwebtoken';
+import { WebSocketServer } from 'ws';
+import type { WebSocket } from 'ws';
+import type { IncomingMessage } from 'http';
+import type { JwtPayload } from 'jsonwebtoken';
 
 const webSocketServer = new WebSocketServer({ noServer: true });
 

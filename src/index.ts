@@ -1,5 +1,5 @@
 import http from 'http';
-import { IncomingMessage } from 'http';
+import type { IncomingMessage } from 'http';
 import url from 'url';
 
 import app from './app.ts';

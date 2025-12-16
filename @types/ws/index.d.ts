@@ -1,4 +1,4 @@
-import { JwtPayload } from 'jsonwebtoken';
+import type { JwtPayload } from 'jsonwebtoken';
 import 'ws';
 
 declare module 'ws' {
