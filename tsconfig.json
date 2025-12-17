@@ -2,6 +2,7 @@
   "compilerOptions": {
     "allowImportingTsExtensions": true,
     "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "noEmit": true,
@@ -9,5 +10,12 @@
     "rootDir": "./src",
     "strict": true,
     "target": "esnext",
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".vscode",
+    "**/node_modules/*"
+  ],
+  "include": ["**/*.ts"]
 }
