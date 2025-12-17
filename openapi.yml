@@ -16,8 +16,10 @@ servers:
   - url: https://staging.api.example.com/v0
     description: Staging server
 tags:
+  - name: signin
+    description: Log in or sign up.
   - name: users
-    description: Operations around user accounts and profiles.
+    description: Operations around user profiles.
   - name: conversations
     description: Conversation lifecycle and membership.
   - name: messages
@@ -25,6 +27,52 @@ tags:
   - name: realtime
     description: WebSocket upgrade for real-time events.
 paths:
+  /signup:
+    post:
+      tags:
+        - signin
+      summary: Create a user, then create token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+      responses:
+        '201':
+          description: User token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /login:
+    post:
+      tags:
+        - signin
+      summary: Sign in a user if it exists, then create token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+      responses:
+        '201':
+          description: User token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/InvalidPassword'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /users:
     get:
       tags:
@@ -46,27 +94,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedUsers'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-    post:
-      tags:
-        - users
-      summary: Create a user.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserCreate'
-      responses:
-        '201':
-          description: Created user object.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
   /users/{userId}:
@@ -424,6 +451,23 @@ components:
         message:
           type: string
           description: Human-readable error message.
+    Login:
+      type: object
+      required:
+        - password
+        - username
+      properties:
+        password:
+          type: string
+        username:
+          type: string
+    Token:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
     Date:
       type: object
       properties:
@@ -455,16 +499,6 @@ components:
         date:
           $ref: '#/components/schemas/Date'
         displayName:
-          type: string
-    UserCreate:
-      type: object
-      required:
-        - password
-        - username
-      properties:
-        password:
-          type: string
-        username:
           type: string
     UserUpdate:
       type: object
@@ -653,6 +687,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+    InvalidPassword:
+      description: Invalid password.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
     Unauthorized:
       description: Authentication required or invalid.
       content:
@@ -661,6 +701,12 @@ components:
             $ref: '#/components/schemas/Error'
     NotFound:
       description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict.
       content:
         application/json:
           schema:

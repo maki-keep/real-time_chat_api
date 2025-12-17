@@ -2,15 +2,18 @@ import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import config from '../config.ts';
 
-const { JWT_SECRET } = config;
+const {
+  JWT_OPTIONS_ISSUER,
+  JWT_SECRET
+} = config;
 
 const extractTokenFromRequest = (request: Request) => {
   if (request.headers && request.headers.authorization) {
     // Authorization: Bearer <token>
-    const parts = request.headers.authorization.split(' ');
+    const [bearer, token] = request.headers.authorization.split(' ');
 
-    if (parts.length === 2 && /^Bearer$/i.test(parts[0])) {
-      return parts[1];
+    if (/^Bearer$/i.test(bearer)) {
+      return token;
     }
   }
 
@@ -27,9 +30,18 @@ const verifyToken = (request: Request) => {
     throw new Error('Missing token');
   }
 
-  const decoded = jwt.verify(token, JWT_SECRET);
+  const decoded = jwt.verify(
+    token,
+    JWT_SECRET,
+    {
+      audience: JWT_OPTIONS_ISSUER,
+      issuer: JWT_OPTIONS_ISSUER
+    });
   if (typeof decoded === 'string') {
     throw new Error('Invalid token payload');
+  }
+  if (!decoded.sub || !decoded.username) {
+    throw new Error('Invalid token claims');
   }
 
   return decoded;
