@@ -8,4 +8,5 @@ export default {
   JWT_SECRET: process.env.JWT_SECRET || 'replace-me',
   PORT: process.env.PORT || 3000,
   SALT_ROUNDS: process.env.SALT_ROUNDS || 19,
+  SERVER_UPGRADE_PATH: process.env.SERVER_UPGRADE_PATH || '/realtime/connect'
 };
