@@ -5,7 +5,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE TABLE IF NOT EXISTS users (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   username text NOT NULL UNIQUE,
-  password_hash text,
+  password_hash text NOT NULL,
   avatar_url text,
   bio text,
   display_name text,
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS members (
 CREATE TABLE IF NOT EXISTS messages (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   conversation_id uuid NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
-  author_id uuid NOT NULL REFERENCES users(id) ON DELETE SET NULL,
+  author_id uuid NOT NULL REFERENCES users(id),
   content text NOT NULL,
   metadata jsonb,
   created_at timestamptz DEFAULT now(),

@@ -1,7 +1,7 @@
-const fs = require('fs');
-const path = require('path');
-const { knex } = require('./knex');
-require('dotenv').config();
+import fs from 'fs';
+import path from 'path';
+import { knex } from './knex.ts';
+import 'dotenv/config';
 
 async function run() {
   const sqlPath = path.join(__dirname, 'migrations', '001_init.sql');
@@ -21,4 +21,4 @@ if (require.main === module) {
   run();
 }
 
-module.exports = run;
+export default run;

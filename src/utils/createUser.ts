@@ -1,16 +1,15 @@
-import usersStore from "../stores/usersStore.ts";
+import User from '../models/User.ts';
 
 /**
- * Creates a new user and adds it to the users store.
+ * Creates a new user in the database.
  */
-const createUser = (passwordHash: string, username: string) => {
-  const newUser = {
-    id: Date.now().toString(),
-    passwordHash,
-    username
-  };
-  usersStore.items.push(newUser);
-  return newUser;
+const createUser = async (username: string, passwordHash: string, additionalData?: { avatar_url?: string; bio?: string; display_name?: string }) => {
+  try {
+    const newUser = await User.createUser(username, passwordHash, additionalData);
+    return newUser;
+  } catch (error) {
+    throw new Error(`Failed to create user: ${(error as Error).message}`);
+  }
 };
 
 export default createUser;

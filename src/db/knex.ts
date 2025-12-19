@@ -1,7 +1,8 @@
-const knex = require('knex');
-const { Model } = require('objection');
-const path = require('path');
-require('dotenv').config();
+
+import knex from 'knex';
+import { Model } from 'objection';
+import path from 'path';
+import 'dotenv/config';
 
 const config = {
   client: 'pg',
@@ -22,9 +23,11 @@ const config = {
   }
 };
 
-const knexInstance = knex(config);
+const knexInstance = (knex as any)(config);
 
 // Bind Objection Model to knex instance so models can use it
 Model.knex(knexInstance);
 
-module.exports = { knex: knexInstance, Model };
+export { knexInstance as knex, Model };
+
+

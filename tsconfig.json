@@ -7,7 +7,7 @@
     "moduleResolution": "nodenext",
     "noEmit": true,
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": ".",
     "strict": true,
     "target": "esnext",
   },
