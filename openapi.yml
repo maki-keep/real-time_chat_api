@@ -37,7 +37,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Login'
+              type: object
+              required:
+                - password
+                - username
+              properties:
+                password:
+                  type: string
+                username:
+                  type: string
       responses:
         '201':
           description: User token.
@@ -59,7 +67,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Login'
+              type: object
+              required:
+                - password
+                - username
+              properties:
+                password:
+                  type: string
+                username:
+                  type: string
       responses:
         '201':
           description: User token.
@@ -128,7 +144,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserUpdate'
+              type: object
+              properties:
+                avatarUrl:
+                  type: string
+                  format: uri
+                bio:
+                  type: string
+                displayName:
+                  type: string
+                username:
+                  type: string
       responses:
         '200':
           description: Updated user object.
@@ -180,7 +206,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ConversationCreate'
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                isPrivate:
+                  type: boolean
       responses:
         '201':
           description: Created conversation object.
@@ -224,7 +257,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ConversationUpdate'
+              type: object
+              properties:
+                title:
+                  type: string
+                isPrivate:
+                  type: boolean
       responses:
         '200':
           description: Updated conversation object.
@@ -266,7 +304,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MemberAdd'
+              type: object
+              required:
+                - userId
+              properties:
+                userId:
+                  type: string
+                  description: References userId.
+                roleIds:
+                  type: array
+                  items:
+                    type: string
       responses:
         '200':
           description: Conversation with updated list of members.
@@ -342,7 +390,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MessageCreate'
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                metadata:
+                  type: object
       responses:
         '201':
           description: Created message object.
@@ -392,7 +447,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MessageUpdate'
+              type: object
+              properties:
+                content:
+                  type: string
+                metadata:
+                  type: object
       responses:
         '200':
           description: Updated message object.
@@ -451,16 +511,6 @@ components:
         message:
           type: string
           description: Human-readable error message.
-    Login:
-      type: object
-      required:
-        - password
-        - username
-      properties:
-        password:
-          type: string
-        username:
-          type: string
     Token:
       type: object
       required:
@@ -468,24 +518,26 @@ components:
       properties:
         token:
           type: string
-    Date:
+    BaseSchema:
       type: object
+      required:
+        - id
       properties:
-        created:
+        id:
+          type: string
+        createdAt:
           type: string
           format: date-time
-        updated:
+        updatedAt:
           type: string
           format: date-time
     User:
       type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseSchema'
       required:
-        - id
         - username
       properties:
-        id:
-          type: string
-          description: Unique user ID.
         username:
           type: string
         avatar:
@@ -496,35 +548,17 @@ components:
               format: uri
         bio:
           type: string
-        date:
-          $ref: '#/components/schemas/Date'
         displayName:
-          type: string
-    UserUpdate:
-      type: object
-      properties:
-        avatarUrl:
-          type: string
-          format: uri
-        bio:
-          type: string
-        displayName:
-          type: string
-        username:
           type: string
     Conversation:
       type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseSchema'
       required:
-        - id
         - title
       properties:
-        id:
-          type: string
-          description: Unique conversation ID.
         title:
           type: string
-        date:
-          $ref: '#/components/schemas/Date'
         isPrivate:
           type: boolean
           description: Whether conversation is private.
@@ -532,66 +566,41 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Member'
-    ConversationCreate:
-      type: object
-      required:
-        - title
-      properties:
-        title:
-          type: string
-        isPrivate:
-          type: boolean
-    ConversationUpdate:
-      type: object
-      properties:
-        title:
-          type: string
-        isPrivate:
-          type: boolean
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
     Role:
       type: object
-      description: A user's role in a conversation.
+      description: A role in a conversation. Can be assigned to a member.
+      allOf:
+        - $ref: '#/components/schemas/BaseSchema'
       required:
-        - id
+        - rolename
       properties:
-        id:
-          type: string
-          description: Unique role ID.
         rolename:
           type: string
     Member:
       type: object
-      required:
-        - id
-        - userId
-      properties:
-        id:
-          type: string
-          description: Unique member ID.
-        userId:
-          type: string
-          description: References userId.
-        roleId:
-          type: string
-          description: References roleId.
-    MemberAdd:
-      type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseSchema'
       required:
         - userId
       properties:
         userId:
           type: string
           description: References userId.
-        roleId:
-          type: string
-          description: References roleId.
+        roleIds:
+          type: array
+          items:
+            type: string
     Message:
       type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseSchema'
       required:
         - author
         - content
-        - conversationId
-        - id
       properties:
         author:
           type: string
@@ -599,33 +608,9 @@ components:
         content:
           type: string
           description: Message body, as plain text or Markdown.
-        conversationId:
-          type: string
-          description: References conversationId.
-        id:
-          type: string
-          description: Unique message ID.
-        date:
-          $ref: '#/components/schemas/Date'
         metadata:
           type: object
           description: Metadata such as attachments, reactions.
-    MessageCreate:
-      type: object
-      required:
-        - content
-      properties:
-        content:
-          type: string
-        metadata:
-          type: object
-    MessageUpdate:
-      type: object
-      properties:
-        content:
-          type: string
-        metadata:
-          type: object
     Pagination:
       type: object
       properties:
