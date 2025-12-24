@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
-import findUsername from '../queries/findByUsername.ts';
+
+import User from '../models/User.ts';
 import { validate } from '../utils/passwordHash.ts';
 import signToken from '../utils/jwt.ts';
 
@@ -16,12 +17,12 @@ const login = async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Missing credentials' });
   }
 
-  const userRecord = await findUsername(username);
-  if (!userRecord) {
-    return res.status(404).json({ error: 'User not found' });
-  }
-
   try {
+    const userRecord = await User.findByUsername(username);
+    if (!userRecord) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
     // validate password
     const validPassword = await validate(password, userRecord.password_hash);
     if (!validPassword) {
@@ -31,9 +32,9 @@ const login = async (req: Request, res: Response) => {
     // sign JWT
     const token = signToken(userRecord.id, userRecord.username);
 
-    return res.json({ token });
-  } catch (error) {
-    res.status(500).json({ error: 'Error on login' });
+    return res.status(201).json({ token });
+  } catch {
+    return res.status(500).json({ error: 'Error on login' });
   }
 };
 

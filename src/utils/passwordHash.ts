@@ -4,7 +4,7 @@ import config from '../config.ts';
 const { SALT_ROUNDS } = config;
 
 const hash = async (password: string) => {
-  return await bcrypt.hash(password, Number(SALT_ROUNDS));
+  return await bcrypt.hash(password, SALT_ROUNDS);
 };
 
 const validate = async (password: string, passwordHash: string) => {

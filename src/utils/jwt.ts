@@ -2,7 +2,10 @@ import jwt from 'jsonwebtoken';
 import type { JwtPayload } from 'jsonwebtoken';
 import config from '../config.ts';
 
-const { JWT_SECRET, JWT_OPTIONS_ISSUER } = config;
+const {
+  JWT_SECRET,
+  JWT_OPTIONS_ISSUER
+} = config;
 
 const signToken = (sub: string, username: string): string => {
   if (!sub || !username) {

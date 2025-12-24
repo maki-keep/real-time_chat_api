@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import config from '../config.js';
+import config from '../config.ts';
 
 const {
   JWT_OPTIONS_ISSUER,
@@ -53,7 +53,7 @@ const authenticate = (req: Request, res: Response, next: NextFunction) => {
     req.user = decoded;
     next();
   } catch (err: any) {
-    res.status(401).json({ error: err.message || 'Unauthorized' });
+    return res.status(401).json({ error: err.message || 'Unauthorized' });
   }
 };
 

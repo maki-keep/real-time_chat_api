@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
-import findUsername from '../queries/findByUsername.ts';
+
+import User from '../models/User.ts';
 import { hash } from '../utils/passwordHash.ts';
-import createUser from '../utils/createUser.ts';
 import signToken from '../utils/jwt.ts';
 
 /**
@@ -17,25 +17,25 @@ const signup = async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Missing credentials' });
   }
 
-  const existingUser = await findUsername(username);
-  if (existingUser) {
-    // user conflict (409)
-    return res.status(409).json({ error: 'User already exists' });
-  }
-
   try {
+    const existingUser = await User.findByUsername(username);
+    if (existingUser) {
+      // user conflict (409)
+      return res.status(409).json({ error: 'User already exists' });
+    }
+
     // hash the password
     const passwordHash = await hash(password);
 
     // create a new user
-    const newUser = await createUser(passwordHash, username);
+    const newUser = await User.createUser(username, passwordHash);
 
     // sign JWT
     const token = signToken(newUser.id, newUser.username);
 
-    return res.json({ token });
-  } catch (error) {
-    res.status(500).json({ error: 'Error on signup' });
+    return res.status(201).json({ token });
+  } catch {
+    return res.status(500).json({ error: 'Error on signup' });
   }
 };
 
