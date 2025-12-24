@@ -1,7 +1,9 @@
-import { Model } from 'objection';
+import type { UUID } from 'node:crypto';
+
+import { Model } from '../db/knex.ts';
 
 export default class BaseModel extends Model {
-  id!: string;
+  id!: UUID;
   created_at?: Date;
   updated_at?: Date;
 
@@ -10,22 +12,32 @@ export default class BaseModel extends Model {
       type: 'object',
       properties: {
         id: { type: 'string' },
-        created_at: { type: 'string', format: 'date-time' },
-        updated_at: { type: 'string', format: 'date-time' }
+        created_at: {
+          type: 'string',
+          format: 'date-time'
+        },
+        updated_at: {
+          type: 'string',
+          format: 'date-time'
+        }
       }
     };
   }
 
-  // Helper to merge this model's jsonSchema with base json schema
+  // helper to merge this model's jsonSchema with base jsonSchema
   static mergeJsonSchema(schema: any) {
     const base = (this as any).__proto__.jsonSchema || {};
     return {
       type: 'object',
-      required: [ ...(base.required || []), ...(schema.required || []) ],
+      required: [
+        ...(base.required || []),
+        ...(schema.required || [])
+      ],
       properties: {
         ...(base.properties || {}),
         ...(schema.properties || {})
       }
     };
   }
+
 }

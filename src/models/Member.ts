@@ -1,13 +1,13 @@
 import { Model } from 'objection';
+import type { UUID } from 'node:crypto';
+
 import BaseModel from './BaseModel.ts';
-import User from './User.ts';
 import Conversation from './Conversation.ts';
-import Role from './Role.ts';
+import User from './User.ts';
 
 export default class Member extends BaseModel {
-  conversation_id!: string;
-  user_id!: string;
-  role_id?: string | null;
+  conversation_id!: UUID;
+  user_id!: UUID;
 
   static get tableName() {
     return 'members';
@@ -15,59 +15,75 @@ export default class Member extends BaseModel {
 
   static get jsonSchema() {
     return super.mergeJsonSchema({
-      required: ['conversation_id', 'user_id'],
+      required: [
+        'conversation_id',
+        'user_id'
+      ],
       properties: {
         conversation_id: { type: 'string' },
-        user_id: { type: 'string' },
-        role_id: { type: ['string', 'null'] }
+        user_id: { type: 'string' }
       }
     });
   }
 
   static get relationMappings() {
     return {
-      user: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: User,
-        join: {
-          from: 'conversation_members.user_id',
-          to: 'users.id'
-        }
-      },
       conversation: {
         relation: Model.BelongsToOneRelation,
         modelClass: Conversation,
         join: {
-          from: 'conversation_members.conversation_id',
+          from: 'members.conversation_id',
           to: 'conversations.id'
         }
       },
-      role: {
+      user: {
         relation: Model.BelongsToOneRelation,
-        modelClass: Role,
+        modelClass: User,
         join: {
-          from: 'conversation_members.role_id',
-          to: 'roles.id'
+          from: 'members.user_id',
+          to: 'users.id'
         }
       }
     };
   }
 
-  static async addMember(conversationId: string, userId: string, roleId?: string | null) {
-    return await this.query().insert({ conversation_id: conversationId, user_id: userId, role_id: roleId });
+  static async addMember(conversationId: UUID, userId: UUID) {
+    return await this
+      .query()
+      .insert({
+        conversation_id: conversationId,
+        user_id: userId
+      });
   }
 
-  static async removeById(id: string) {
-    return await this.query().deleteById(id);
+  static async listByConversation(conversationId: UUID) {
+    const items = await this
+      .query()
+      .where('conversation_id', conversationId);
+    return {
+      items,
+      total: items.length
+    };
   }
 
-  static async getById(id: string) {
-    return await this.query().findById(id);
+  static async getById(id: UUID) {
+    return await this
+      .query()
+      .findById(id);
   }
 
-  static async listByConversation(conversationId: string) {
-    const items = await this.query().where('conversation_id', conversationId);
-    return { items, total: items.length };
+  static async removeMember(conversationId: UUID, memberId: UUID) {
+    return await this
+      .query()
+      .delete()
+      .where('conversation_id', conversationId)
+      .andWhere('id', memberId);
+  }
+
+  static async removeById(id: UUID) {
+    return await this
+      .query()
+      .deleteById(id);
   }
 
 }

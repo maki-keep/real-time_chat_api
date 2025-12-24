@@ -1,12 +1,14 @@
 import { Model } from 'objection';
+import type { UUID } from 'node:crypto';
+
 import BaseModel from './BaseModel.ts';
 import User from './User.ts';
 import Conversation from './Conversation.ts';
 
 export default class Message extends BaseModel {
-  conversation_id!: string;
-  author_id!: string;
+  author_id!: UUID;
   content!: string;
+  conversation_id!: UUID;
   metadata?: any;
 
   static get tableName() {
@@ -15,12 +17,19 @@ export default class Message extends BaseModel {
 
   static get jsonSchema() {
     return super.mergeJsonSchema({
-      required: ['content', 'conversation_id'],
+      required: [
+        'author_id',
+        'content',
+        'conversation_id'
+      ],
       properties: {
-        conversation_id: { type: 'string' },
         author_id: { type: 'string' },
         content: { type: 'string' },
-        metadata: { type: ['object', 'null'] }
+        conversation_id: { type: 'string' },
+        metadata: { type: [
+          'object',
+          'null'
+        ] }
       }
     });
   }
@@ -46,35 +55,70 @@ export default class Message extends BaseModel {
     };
   }
 
-  static async createMessage(conversationId: string, authorId: string, content: string, metadata?: any) {
-    const message: any = await this.query().insert({
-      conversation_id: conversationId,
-      author_id: authorId,
-      content,
-      metadata
-    });
-    return message;
+  static async createMessage(authorId: UUID, content: string, conversationId: UUID, metadata?: any) {
+    return await this
+      .query()
+      .insert({
+        author_id: authorId,
+        content,
+        conversation_id: conversationId,
+        metadata
+      });
   }
 
-  static async getById(id: string) {
-    return await this.query().findById(id);
-  }
-
-  static async updateById(id: string, data: Partial<Message>) {
-    return await this.query().patchAndFetchById(id, data);
-  }
-
-  static async deleteById(id: string) {
-    return await this.query().deleteById(id);
-  }
-
-  static async listByConversation(conversationId: string, options: { limit?: number; offset?: number; since?: string } = {}) {
+  static async listByConversation(conversationId: UUID, options: {
+    limit?: number;
+    offset?: number;
+    by?: string;
+    q?: string;
+    since?: string;
+  } = {}) {
     const limit = options.limit || 50;
     const offset = options.offset || 0;
-    const qb = this.query().where('conversation_id', conversationId).orderBy('created_at', 'asc').limit(limit).offset(offset);
-    if (options.since) qb.where('created_at', '>', options.since);
+
+    const qb = this
+      .query()
+      .where('conversation_id', conversationId);
+    if (options.by) {
+      qb.where('author_id', 'like', `%${options.by}%`);
+    }
+    if (options.q) {
+      qb.where('content', 'like', `%${options.q}%`);
+    }
+    if (options.since) {
+      qb.where('created_at', '>', options.since);
+    }
+    qb
+      .limit(limit)
+      .offset(offset)
+      .orderBy('created_at', 'desc');
+
     const items = await qb;
-    return { items, limit, offset, total: items.length };
+
+    return {
+      items,
+      limit,
+      offset,
+      total: items.length
+    };
+  }
+
+  static async getById(id: UUID) {
+    return await this
+      .query()
+      .findById(id);
+  }
+
+  static async updateById(id: UUID, data: Partial<Message>) {
+    return await this
+      .query()
+      .patchAndFetchById(id, data);
+  }
+
+  static async deleteById(id: UUID) {
+    return await this
+      .query()
+      .deleteById(id);
   }
 
 }

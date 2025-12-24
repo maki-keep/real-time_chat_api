@@ -1,7 +1,9 @@
 import { Model } from 'objection';
+import type { UUID } from 'node:crypto';
+
 import BaseModel from './BaseModel.ts';
-import Message from './Message.ts';
 import Member from './Member.ts';
+import toPublicUser from './toPublicUser.ts';
 
 export default class User extends BaseModel {
   username!: string;
@@ -16,28 +18,35 @@ export default class User extends BaseModel {
 
   static get jsonSchema() {
     return super.mergeJsonSchema({
-      required: ['username', 'password_hash'],
+      required: [
+        'username',
+        'password_hash'
+      ],
       properties: {
         username: { type: 'string' },
-        password_hash: { type: ['string', 'null'] },
-        avatar_url: { type: ['string', 'null'] },
-        bio: { type: ['string', 'null'] },
-        display_name: { type: ['string', 'null'] }
+        password_hash: { type: [
+          'string',
+          'null'
+        ] },
+        avatar_url: { type: [
+          'string',
+          'null'
+        ] },
+        bio: { type: [
+          'string',
+          'null'
+        ] },
+        display_name: { type: [
+          'string',
+          'null'
+        ] }
       }
     });
   }
 
   static get relationMappings() {
     return {
-      messages: {
-        relation: Model.HasManyRelation,
-        modelClass: Message,
-        join: {
-          from: 'users.id',
-          to: 'messages.author_id'
-        }
-      },
-      members: {
+      memberships: {
         relation: Model.HasManyRelation,
         modelClass: Member,
         join: {
@@ -48,47 +57,76 @@ export default class User extends BaseModel {
     };
   }
 
-  static async createUser(username: string, passwordHash: string, additionalData: { avatar_url?: string; bio?: string; display_name?: string; } | undefined) {
-    const inserted: any = await this.query().insert({
-      username,
-      password_hash: passwordHash,
-      ...additionalData
-    });
-    if (inserted && inserted.password_hash) delete inserted.password_hash;
-    return inserted;
+  static async createUser(username: string, passwordHash: string) {
+    const user = await this
+      .query()
+      .insert({
+        username,
+        password_hash: passwordHash
+      });
+    return toPublicUser(user);
   }
 
-  static async getById(id: string): Promise<User | undefined> {
-    return await this.query().findById(id).select('id', 'username', 'avatar_url', 'bio', 'display_name', 'created_at', 'updated_at');
-  }
-
-  static async updateById(id: string, data: Partial<User>): Promise<User | undefined> {
-    const updated: any = await this.query().patchAndFetchById(id, data);
-    if (updated && updated.password_hash) delete updated.password_hash;
-    return updated;
-  }
-
-  static async deleteById(id: string) {
-    return await this.query().deleteById(id);
-  }
-
-  static async list(options: { limit?: number; offset?: number; q?: string } = {}) {
-    const limit = options.limit || 20;
-    const offset = options.offset || 0;
-    const q = options.q;
-
-    const qb = this.query().select('id', 'username', 'avatar_url', 'bio', 'display_name', 'created_at', 'updated_at');
-    if (q) qb.where('username', 'like', `%${q}%`).orWhere('display_name', 'like', `%${q}%`);
-    qb.limit(limit).offset(offset).orderBy('created_at', 'desc');
-
-    const items = await qb;
-    return { items, limit, offset, total: items.length };
-  }
-
-  static async findByUsername(username: string): Promise<User | undefined> {
-    return await this.query()
+  static async findByUsername(username: string) {
+    // select full user only for signup and login
+    // do not return full user to client
+    return await this
+      .query()
       .where('username', username)
-      .select('id', 'username', 'avatar_url', 'bio', 'display_name', 'created_at', 'updated_at')
       .first();
   }
+
+  static async list(options: {
+    limit?: number;
+    offset?: number;
+    q?: string;
+  } = {}) {
+    const limit = options.limit || 20;
+    const offset = options.offset || 0;
+
+    // query builder select without password_hash
+    const qb = this.query();
+    if (options.q) {
+      qb
+        .where('username', 'like', `%${options.q}%`)
+        .orWhere('display_name', 'like', `%${options.q}%`);
+    }
+    qb
+      .limit(limit)
+      .offset(offset)
+      .orderBy('created_at', 'desc');
+
+    const items = await qb;
+
+    // convert all users into public users without password_hash
+    const publicItems = items.map(u => toPublicUser(u));
+
+    return {
+      items: publicItems,
+      limit,
+      offset,
+      total: items.length
+    };
+  }
+
+  static async getById(id: UUID) {
+    const user = await this
+      .query()
+      .findById(id);
+    if (user) return toPublicUser(user);
+  }
+
+  static async updateById(id: UUID, data: Partial<User>) {
+    const user = await this
+      .query()
+      .patchAndFetchById(id, data);
+    return toPublicUser(user);
+  }
+
+  static async deleteById(id: UUID) {
+    return await this
+      .query()
+      .deleteById(id);
+  }
+
 }
