@@ -1,21 +1,24 @@
 {
   "compilerOptions": {
-    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "noEmit": true,
+    "noEmit": false,
     "outDir": "./dist",
-    "rootDir": ".",
+    "rootDir": "./src",
+    "skipLibCheck": true,
     "strict": true,
     "target": "esnext",
   },
   "exclude": [
-    "node_modules",
-    "dist",
-    ".vscode",
-    "**/node_modules/*"
+    "dist/**/*",
+    "node_modules/**/*",
+    "**/node_modules/**/*",
+    "**/*.test.ts"
   ],
-  "include": ["**/*.ts"]
+  "include": [
+    "@types/**/*.ts",
+    "src/**/*.ts"
+  ]
 }

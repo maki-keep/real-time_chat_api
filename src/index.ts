@@ -1,10 +1,10 @@
 import http from 'http';
 
-import app from './app.ts';
-import config from './config.ts';
-import { verifyToken } from './middleware/auth.ts';
-import destroySocket from './utils/destroySocket.ts';
-import { upgrade } from './wss.ts';
+import app from './app.js';
+import config from './config.js';
+import { verifyToken } from './middleware/auth.js';
+import destroySocket from './utils/destroySocket.js';
+import { upgrade } from './wss.js';
 
 const { BASE_URL, PORT, SERVER_UPGRADE_PATH } = config;
 

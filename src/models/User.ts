@@ -1,9 +1,9 @@
 import { Model } from 'objection';
 import type { UUID } from 'node:crypto';
 
-import BaseModel from './BaseModel.ts';
-import Member from './Member.ts';
-import toPublicUser from './toPublicUser.ts';
+import BaseModel from './BaseModel.js';
+import Member from './Member.js';
+import toPublicUser from './toPublicUser.js';
 
 export default class User extends BaseModel {
   username!: string;

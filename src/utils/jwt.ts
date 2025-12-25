@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import type { JwtPayload } from 'jsonwebtoken';
-import config from '../config.ts';
+import config from '../config.js';
 
 const {
   JWT_SECRET,

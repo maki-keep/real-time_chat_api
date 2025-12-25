@@ -1,6 +1,6 @@
 import type { UUID } from 'node:crypto';
 
-import { Model } from '../db/knex.ts';
+import { Model } from '../db/knex.js';
 
 export default class BaseModel extends Model {
   id!: UUID;

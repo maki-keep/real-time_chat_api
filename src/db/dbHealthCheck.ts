@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { knex } from './knex.ts';
+import { knex } from './knex.js';
 
 const dbHealthCheck = async (_req: Request, res: Response, next: NextFunction) => {
   try {

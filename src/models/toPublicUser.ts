@@ -1,4 +1,4 @@
-import User from './User.ts';
+import User from './User.js';
 
 const toPublicUser = (user: User) => {
   // extract password_hash and the rest of user

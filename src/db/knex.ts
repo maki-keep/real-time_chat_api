@@ -1,15 +1,9 @@
-import { fileURLToPath } from 'node:url';
-import {
-  dirname,
-  join
-} from 'node:path';
 import type { Knex } from 'knex';
-import config from '../config.ts';
+import config from '../config.js';
+import projectRootPath from '../projectRootPath.js';
+import { join } from 'node:path';
 import knex from 'knex';
 import { Model } from 'objection';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 const knexConfig: Knex.Config = {
   client: 'pg',
@@ -26,7 +20,7 @@ const knexConfig: Knex.Config = {
     acquireTimeoutMillis: 30000
   },
   migrations: {
-    directory: join(__dirname, 'migrations')
+    directory: join(projectRootPath, 'migrations')
   }
 };
 

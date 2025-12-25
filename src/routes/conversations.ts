@@ -2,14 +2,14 @@ import express from 'express';
 import type { Request, Response } from 'express';
 import type { UUID } from 'node:crypto';
 
-import queryOptions from './queryOptions.ts';
-import Conversation from '../models/Conversation.ts';
-import requireRequestBodyProperty from '../middleware/requireRequestBodyProperty.ts';
-import requireParam from '../middleware/requireParam.ts';
-import requireParamUUID from '../middleware/requireParamUUID.ts';
-import requireRBPUUID from '../middleware/requireRBPUUID.ts';
-import Member from '../models/Member.ts';
-import messagesRouter from '../routes/messages.ts';
+import queryOptions from './queryOptions.js';
+import Conversation from '../models/Conversation.js';
+import requireRequestBodyProperty from '../middleware/requireRequestBodyProperty.js';
+import requireParam from '../middleware/requireParam.js';
+import requireParamUUID from '../middleware/requireParamUUID.js';
+import requireRBPUUID from '../middleware/requireRBPUUID.js';
+import Member from '../models/Member.js';
+import messagesRouter from '../routes/messages.js';
 
 const router = express.Router();
 

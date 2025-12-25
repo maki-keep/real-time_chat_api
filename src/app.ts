@@ -1,16 +1,16 @@
 import express from 'express';
 import type { Request, Response } from 'express';
 
-import dbHealthCheck from './db/dbHealthCheck.ts';
-import requireRequestBody from './middleware/requireRequestBody.ts';
+import dbHealthCheck from './db/dbHealthCheck.js';
+import requireRequestBody from './middleware/requireRequestBody.js';
 
-import login from './middleware/login.ts';
-import signup from './middleware/signup.ts';
+import login from './middleware/login.js';
+import signup from './middleware/signup.js';
 
-import { authenticate } from './middleware/auth.ts';
+import { authenticate } from './middleware/auth.js';
 
-import usersRouter from './routes/users.ts';
-import conversationsRouter from './routes/conversations.ts';
+import usersRouter from './routes/users.js';
+import conversationsRouter from './routes/conversations.js';
 
 const app = express();
 app.use(express.json());

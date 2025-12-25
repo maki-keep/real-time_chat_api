@@ -1,9 +1,9 @@
 import { Model } from 'objection';
 import type { UUID } from 'node:crypto';
 
-import BaseModel from './BaseModel.ts';
-import Conversation from './Conversation.ts';
-import User from './User.ts';
+import BaseModel from './BaseModel.js';
+import Conversation from './Conversation.js';
+import User from './User.js';
 
 export default class Member extends BaseModel {
   conversation_id!: UUID;

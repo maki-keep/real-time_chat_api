@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import config from '../config.ts';
+import config from '../config.js';
 
 const { SALT_ROUNDS } = config;
 

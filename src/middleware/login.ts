@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
 
-import User from '../models/User.ts';
-import { validate } from '../utils/passwordHash.ts';
-import signToken from '../utils/jwt.ts';
+import User from '../models/User.js';
+import { validate } from '../utils/passwordHash.js';
+import signToken from '../utils/jwt.js';
 
 /**
  * Signs a JWT containing the user payload.

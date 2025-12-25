@@ -2,12 +2,12 @@ import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import type { UUID } from 'node:crypto';
 
-import Conversation from '../models/Conversation.ts';
-import queryOptions from './queryOptions.ts';
-import Message from '../models/Message.ts';
-import requireRequestBodyProperty from '../middleware/requireRequestBodyProperty.ts';
-import requireParam from '../middleware/requireParam.ts';
-import requireParamUUID from '../middleware/requireParamUUID.ts';
+import Conversation from '../models/Conversation.js';
+import queryOptions from './queryOptions.js';
+import Message from '../models/Message.js';
+import requireRequestBodyProperty from '../middleware/requireRequestBodyProperty.js';
+import requireParam from '../middleware/requireParam.js';
+import requireParamUUID from '../middleware/requireParamUUID.js';
 
 const router = express.Router({ mergeParams: true });
 

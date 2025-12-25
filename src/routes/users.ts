@@ -2,10 +2,10 @@ import express from 'express';
 import type { Request, Response } from 'express';
 import type { UUID } from 'node:crypto';
 
-import queryOptions from './queryOptions.ts';
-import User from '../models/User.ts';
-import requireParam from '../middleware/requireParam.ts';
-import requireParamUUID from '../middleware/requireParamUUID.ts';
+import queryOptions from './queryOptions.js';
+import User from '../models/User.js';
+import requireParam from '../middleware/requireParam.js';
+import requireParamUUID from '../middleware/requireParamUUID.js';
 
 const router = express.Router();
 

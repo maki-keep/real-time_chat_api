@@ -30,3 +30,4 @@ build/
 # Logs
 logs/
 *.log
+*.tsbuildinfo
