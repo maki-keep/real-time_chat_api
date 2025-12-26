@@ -119,6 +119,7 @@ paths:
         required: true
         schema:
           type: string
+          format: uuid
         description: Unique user identifier.
     get:
       tags:
@@ -166,8 +167,6 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
     delete:
       tags:
         - users
@@ -177,8 +176,6 @@ paths:
           description: User deleted successfully.
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
   /conversations:
     get:
       tags:
@@ -232,6 +229,7 @@ paths:
         required: true
         schema:
           type: string
+          format: uuid
         description: Unique conversation identifier.
     get:
       tags:
@@ -274,8 +272,6 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
     delete:
       tags:
         - conversations
@@ -285,8 +281,6 @@ paths:
           description: Conversation deleted successfully.
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
   /conversations/{conversationId}/members:
     parameters:
       - name: conversationId
@@ -294,6 +288,7 @@ paths:
         required: true
         schema:
           type: string
+          format: uuid
         description: Unique conversation identifier.
     post:
       tags:
@@ -310,11 +305,8 @@ paths:
               properties:
                 userId:
                   type: string
-                  description: References userId.
-                roleIds:
-                  type: array
-                  items:
-                    type: string
+                  format: uuid
+                  description: References user's ID.
       responses:
         '200':
           description: Conversation with updated list of members.
@@ -333,12 +325,14 @@ paths:
         required: true
         schema:
           type: string
+          format: uuid
         description: Unique conversation identifier.
       - name: memberId
         in: path
         required: true
         schema:
           type: string
+          format: uuid
         description: Unique member identifier.
     delete:
       tags:
@@ -349,8 +343,6 @@ paths:
           description: Member removed successfully.
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
   /conversations/{conversationId}/messages:
     parameters:
       - name: conversationId
@@ -358,6 +350,7 @@ paths:
         required: true
         schema:
           type: string
+          format: uuid
         description: Unique conversation identifier.
     get:
       tags:
@@ -416,12 +409,14 @@ paths:
         required: true
         schema:
           type: string
+          format: uuid
         description: Unique conversation identifier.
       - name: messageId
         in: path
         required: true
         schema:
           type: string
+          format: uuid
         description: Unique message identifier.
     get:
       tags:
@@ -464,8 +459,6 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
     delete:
       tags:
         - messages
@@ -475,8 +468,6 @@ paths:
           description: Message deleted successfully.
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
   /realtime/connect:
     get:
       tags:
@@ -525,10 +516,12 @@ components:
       properties:
         id:
           type: string
-        createdAt:
+          format: uuid
+          description: Unique ID of an entity.
+        created_at:
           type: string
           format: date-time
-        updatedAt:
+        updated_at:
           type: string
           format: date-time
     User:
@@ -540,15 +533,12 @@ components:
       properties:
         username:
           type: string
-        avatar:
-          type: object
-          properties:
-            url:
-              type: string
-              format: uri
+        avatar_url:
+          type: string
+          format: uri
         bio:
           type: string
-        displayName:
+        display_name:
           type: string
     Conversation:
       type: object
@@ -559,25 +549,22 @@ components:
       properties:
         title:
           type: string
-        isPrivate:
+        is_private:
           type: boolean
           description: Whether conversation is private.
-        members:
-          type: array
-          items:
-            $ref: '#/components/schemas/Member'
-        roles:
-          type: array
-          items:
-            $ref: '#/components/schemas/Role'
     Role:
       type: object
       description: A role in a conversation. Can be assigned to a member.
       allOf:
         - $ref: '#/components/schemas/BaseSchema'
       required:
+        - conversation_id
         - rolename
       properties:
+        conversation_id:
+          type: string
+          format: uuid
+          description: References conversation's ID.
         rolename:
           type: string
     Member:
@@ -585,29 +572,37 @@ components:
       allOf:
         - $ref: '#/components/schemas/BaseSchema'
       required:
+        - conversation_id
         - userId
       properties:
-        userId:
+        conversation_id:
           type: string
-          description: References userId.
-        roleIds:
-          type: array
-          items:
-            type: string
+          format: uuid
+          description: References conversation's ID.
+        user_id:
+          type: string
+          format: uuid
+          description: References user's ID.
     Message:
       type: object
       allOf:
         - $ref: '#/components/schemas/BaseSchema'
       required:
-        - author
+        - author_id
         - content
+        - conversation_id
       properties:
-        author:
+        author_id:
           type: string
-          description: References userId.
+          format: uuid
+          description: References user's ID.
         content:
           type: string
           description: Message body, as plain text or Markdown.
+        conversation_id:
+          type: string
+          format: uuid
+          description: References conversation's ID.
         metadata:
           type: object
           description: Metadata such as attachments, reactions.
