@@ -22,6 +22,8 @@ tags:
     description: Operations around user profiles.
   - name: conversations
     description: Conversation lifecycle and membership.
+  - name: members
+    description: Operations around members of a conversation.
   - name: messages
     description: Sending, editing and retrieving messages.
   - name: realtime
@@ -176,6 +178,32 @@ paths:
           description: User deleted successfully.
         '401':
           $ref: '#/components/responses/Unauthorized'
+  /users/{userId}/memberships:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Unique user identifier.
+    get:
+      tags:
+        - members
+      summary: List memberships of a user.
+      description: Retrieve a paginated list of conversation members by user ID.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        '200':
+          description: Paginated list of members.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMembers'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /conversations:
     get:
       tags:
@@ -290,9 +318,26 @@ paths:
           type: string
           format: uuid
         description: Unique conversation identifier.
+    get:
+      tags:
+        - members
+      summary: List members in a conversation.
+      description: Retrieve a paginated list of members by conversation ID.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        '200':
+          description: Paginated list of members.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMembers'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
     post:
       tags:
-        - conversations
+        - members
       summary: Add a member to a conversation.
       requestBody:
         required: true
@@ -336,7 +381,7 @@ paths:
         description: Unique member identifier.
     delete:
       tags:
-        - conversations
+        - members
       summary: Remove a member by ID from a conversation.
       responses:
         '204':
@@ -633,6 +678,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Conversation'
+    PaginatedMembers:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Member'
     PaginatedMessages:
       type: object
       allOf:
