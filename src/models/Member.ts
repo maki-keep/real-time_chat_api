@@ -56,12 +56,27 @@ export default class Member extends BaseModel {
       });
   }
 
-  static async listByConversation(conversationId: UUID) {
-    const items = await this
+  static async listByParameter(parameter: 'conversation_id' | 'user_id', parameterId: UUID, options: {
+    limit?: number;
+    offset?: number;
+  } = {}) {
+    const limit = options.limit || 50;
+    const offset = options.offset || 0;
+
+    const qb = this
       .query()
-      .where('conversation_id', conversationId);
+      .where(parameter, parameterId);
+    qb
+      .limit(limit)
+      .offset(offset)
+      .orderBy('created_at', 'desc');
+
+    const items = await qb;
+
     return {
       items,
+      limit,
+      offset,
       total: items.length
     };
   }

@@ -6,6 +6,7 @@ import queryOptions from './queryOptions.js';
 import User from '../models/User.js';
 import requireParam from '../middleware/requireParam.js';
 import requireParamUUID from '../middleware/requireParamUUID.js';
+import membershipsRouter from '../routes/memberships.js';
 
 const router = express.Router();
 
@@ -51,5 +52,7 @@ router.delete('/:userId', async (req: Request, res: Response) => {
     return res.status(500).send();
   }
 });
+
+router.use('/:userId/memberships', membershipsRouter);
 
 export default router;

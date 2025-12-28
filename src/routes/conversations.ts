@@ -7,8 +7,7 @@ import Conversation from '../models/Conversation.js';
 import requireRequestBodyProperty from '../middleware/requireRequestBodyProperty.js';
 import requireParam from '../middleware/requireParam.js';
 import requireParamUUID from '../middleware/requireParamUUID.js';
-import requireRBPUUID from '../middleware/requireRBPUUID.js';
-import Member from '../models/Member.js';
+import membersRouter from '../routes/members.js';
 import messagesRouter from '../routes/messages.js';
 
 const router = express.Router();
@@ -65,25 +64,7 @@ router.delete('/:conversationId', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/:conversationId/members', requireRequestBodyProperty('userId'), requireRBPUUID('userId'), async (req: Request, res: Response) => {
-  try {
-    const added = await Member.addMember(req.params.conversationId as UUID, req.body.userId as UUID);
-    return res.status(201).json(added);
-  } catch {
-    return res.status(500).send();
-  }
-});
-
-router.use('/:conversationId/members/:memberId', requireParam('memberId'), requireParamUUID('memberId'));
-
-router.delete('/:conversationId/members/:memberId', async (req: Request, res: Response) => {
-  try {
-    await Member.removeMember(req.params.conversationId as UUID, req.params.memberId as UUID);
-    return res.status(204).end();
-  } catch {
-    return res.status(500).send();
-  }
-});
+router.use('/:conversationId/members', membersRouter);
 
 router.use('/:conversationId/messages', messagesRouter);
 
