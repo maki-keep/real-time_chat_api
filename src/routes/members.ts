@@ -35,7 +35,7 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/:conversationId/members', requireRequestBodyProperty('userId'), requireRBPUUID('userId'), async (req: Request, res: Response) => {
+router.post('/', requireRequestBodyProperty('userId'), requireRBPUUID('userId'), async (req: Request, res: Response) => {
   try {
     const added = await Member.addMember(req.params.conversationId as UUID, req.body.userId as UUID);
     return res.status(201).json(added);
@@ -44,9 +44,9 @@ router.post('/:conversationId/members', requireRequestBodyProperty('userId'), re
   }
 });
 
-router.use('/:conversationId/members/:memberId', requireParam('memberId'), requireParamUUID('memberId'));
+router.use('/:memberId', requireParam('memberId'), requireParamUUID('memberId'));
 
-router.delete('/:conversationId/members/:memberId', async (req: Request, res: Response) => {
+router.delete('/:memberId', async (req: Request, res: Response) => {
   try {
     await Member.removeMember(req.params.conversationId as UUID, req.params.memberId as UUID);
     return res.status(204).end();
