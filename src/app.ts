@@ -1,6 +1,8 @@
 import express from 'express';
 import type { Request, Response } from 'express';
 
+import corsMiddleware from './cors.js';
+
 import dbHealthCheck from './db/dbHealthCheck.js';
 import requireRequestBody from './middleware/requireRequestBody.js';
 
@@ -14,6 +16,8 @@ import conversationsRouter from './routes/conversations.js';
 
 const app = express();
 app.use(express.json());
+
+app.use(corsMiddleware);
 
 app.use('/', dbHealthCheck);
 app.post('/', requireRequestBody);

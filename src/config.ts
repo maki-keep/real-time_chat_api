@@ -13,6 +13,7 @@ export default {
   DB_USER: process.env.DB_USER || 'postgres',
   JWT_OPTIONS_ISSUER: process.env.JWT_OPTIONS_ISSUER || 'real-time_chat_api',
   JWT_SECRET: process.env.JWT_SECRET || 'replace-me',
+  ORIGIN: process.env.ORIGIN || 'http://localhost:5173',
   PORT: Number(process.env.PORT || 3000),
   SALT_ROUNDS: Number(process.env.SALT_ROUNDS || 9),
   SERVER_UPGRADE_PATH: process.env.SERVER_UPGRADE_PATH || '/realtime/connect'
